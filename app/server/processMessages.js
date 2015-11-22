@@ -5,79 +5,74 @@ var twilioClient = twilio(Meteor.settings.twilio.account, Meteor.settings.twilio
 
 var sendMessage = function(message){
 	var user = Users.findOne({_id: message.userId}, {fields: {'profile.name': 1}});
-	_.each(message.emails, function(emailAddress){
+	var messagetext = "We have detected an issue with your device \"" + message.name + "\" with the deviceiId: " + message.deviceId + ". Please perform maintenance as soon as possible.";
+	try{
+		_.each(message.emails, function(emailAddress){
 
-		Email.send({
-			to: emailAddress,
-			from: 'muerteor@muerteor.com',
-			subject: 'Message from ' + user && user.profile && user.profile.name,
-			text: message.text,
-			html: Handlebars.templates.emailTemplate({
-				message: message.text,
-				sendersName: user && user.profile && user.profile.name,
-				time: displayDuration(message.duration)
-			})
+			Email.send({
+				to: emailAddress,
+				from: 'audioargus@audioargus.com',
+				subject: 'Message from ' + user && user.profile && user.profile.name,
+				text: messagetext,
+				html: Handlebars.templates.emailTemplate({
+					message: messagetext,
+					sendersName: user && user.profile && user.profile.name
+				})
+			});
 		});
-	});
 
-	_.each(message.texts, function(phoneNumber){
-		//Send SMS
-		twilioClient.sendMessage({
+		_.each(message.texts, function(phoneNumber){
+			//Send SMS
+			twilioClient.sendMessage({
 
-			to:'+1' + phoneNumber, // Any number Twilio can deliver to
-			from: TWILIO_PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
-			body: message.text // body of the SMS message
+				to:'+1' + phoneNumber, // Any number Twilio can deliver to
+				from: TWILIO_PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
+				body: messagetext // body of the SMS message
 
-		}, function(err, responseData) { //this function is executed when a response is received from Twilio
+			}, function(err, responseData) { //this function is executed when a response is received from Twilio
 
-			if (!err) { // "err" is an error received during the request, if any
+				if (!err) { // "err" is an error received during the request, if any
 
-				// "responseData" is a JavaScript object containing data received from Twilio.
-				// A sample response from sending an SMS message is here (click "JSON" to see how the data appears in JavaScript):
-				// http://www.twilio.com/docs/api/rest/sending-sms#example-1
+					// "responseData" is a JavaScript object containing data received from Twilio.
+					// A sample response from sending an SMS message is here (click "JSON" to see how the data appears in JavaScript):
+					// http://www.twilio.com/docs/api/rest/sending-sms#example-1
+					console.log(responseData.from); // outputs "+14506667788"
+					console.log(responseData.body); // outputs "word to your mother."
+				}
+			});
+
+		});
+
+		_.each(message.calls, function(phoneNumber){
+			//Initiate Call
+			twilioClient.makeCall({
+
+				to:'+1' + phoneNumber, // Any number Twilio can call
+				from: TWILIO_PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
+				url: Meteor.absoluteUrl('_twiml/' + message._id) // A URL that produces an XML document (TwiML) which contains instructions for the call
+
+			}, function(err, responseData) {
+
+				//executed when the call has been initiated.
 				console.log(responseData.from); // outputs "+14506667788"
-				console.log(responseData.body); // outputs "word to your mother."
-			}
+
+			});
 		});
+	}catch(err){
+		console.log("error sending messages: ", JSON.stringify(err));
+	}
 
-	});
-
-	_.each(message.calls, function(phoneNumber){
-		//Initiate Call
-		twilioClient.makeCall({
-
-			to:'+1' + phoneNumber, // Any number Twilio can call
-			from: TWILIO_PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
-			url: Meteor.absoluteUrl('_twiml/' + message._id) // A URL that produces an XML document (TwiML) which contains instructions for the call
-
-		}, function(err, responseData) {
-
-			//executed when the call has been initiated.
-			console.log(responseData.from); // outputs "+14506667788"
-
-		});
-	});
 	Messages.update({_id: message._id}, {$set: {messageSent: true, lastMessageSentAt: moment().valueOf()}});
 };
 
 processMessages = function(){
-	Meteor.clearTimeout(timeoutHandle);
-	var reRunProcessAfter = 60000; //Lets just be safe and re-run every 60 seconds...
-	var nextMessageToProcess = Messages.findOne({messageSent: false, sendNextMessageAt: {$gt: moment().valueOf()}}, {sort:{sendNextMessageAt: -1 }});
-	if(nextMessageToProcess){
-		reRunProcessAfter = nextMessageToProcess.sendNextMessageAt - moment().valueOf() + 200;
-	}
-	//console.log('re-running processMessages in: ', reRunProcessAfter);
-
 	//Process all old messages
-	Messages.find({messageSent: false, sendNextMessageAt: {$lte: moment().valueOf()}}).forEach(sendMessage);
-	//Setup call for future messages
-	timeoutHandle = Meteor.setTimeout(processMessages, reRunProcessAfter);
+	Messages.find({messageSent: false, deviceHealthy: false}).forEach(sendMessage);
 
 };
 
 Meteor.startup(function () {
-	//processMessages();
+	processMessages();
 });
 
 
@@ -101,7 +96,7 @@ WebApp.connectHandlers.use(function(request, result, next) {
 			var splitPath = request.url.split('/');
 			var requestRoot = splitPath[1];
 			if (requestRoot !== '_twiml' && requestRoot !== '_sigfox'){
-				//Not an Twiml request, return null and the middleware handler will pass request processing to next connectHandler
+				//Not a request we're interested in, return null and the middleware handler will pass request processing to next connectHandler
 				next();
 				return;
 			}else{
@@ -111,10 +106,11 @@ WebApp.connectHandlers.use(function(request, result, next) {
 					}
 					messageId = splitPath[2];
 					message = Messages.findOne({_id: messageId}, {fields: {text: 1, userId: 1}});
-					if(message && _.isString(message.text)){
+					var messagetext = "We have detected an issue with your device \"" + message.name + "\" with the deviceiId: " + message.deviceId + ". Please perform maintenance as soon as possible.";
+					if(message && _.isString(messagetext)){
 						var user = Users.findOne({_id: message.userId}, {fields: {profile: 1}});
 						var twiml = new twilio.TwimlResponse();
-						var intro = "This is an automated message";
+						var intro = "This is an automated message from Audio Argus";
 						if(user && user.profile && user.profile.name){
 							intro += " being sent to you by " + user.profile.name;
 						}
@@ -122,9 +118,9 @@ WebApp.connectHandlers.use(function(request, result, next) {
 
 						twiml.say(intro, {voice: 'man', language:'en'})
 							.pause({ length: 1 })
-							.say(message.text, {voice: 'woman', language:'en'})
+							.say(messagetext, {voice: 'woman', language:'en'})
 							.pause({ length: 1 })
-							.say("This message was sent to you through Moo Air Tee Or, a dead man's switch which sends a message if a user doesn't check in for a certain period of time. For more information go to M, U, E, R, T, E, O, R, dot com.", {voice: 'man', language:'en'})
+							.say("This message was sent to you through Audio Argus, For more information go to Audio Argus, dot Meteor, dot com.", {voice: 'man', language:'en'})
 							.pause({ length: 1 })
 							.say("Thank you, good bye.", {voice: 'man', language:'en'});
 						//.play('http://www.example.com/some_sound.mp3');
@@ -138,6 +134,7 @@ WebApp.connectHandlers.use(function(request, result, next) {
 					if(message){
 						Messages.update({_id: message._id}, {$set: {deviceHealthy: false}});
 					}
+					processMessages();
 					console.log("_sigfox deviceId: ", deviceId);
 					result.writeHead(200, {'Content-Type': 'text/xml'});
 					result.end();

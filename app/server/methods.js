@@ -32,6 +32,7 @@ Meteor.methods({
 					messageSent: false,
 					deviceHealthy: false
 				}});
+				processMessages();
 			}else{
 				throw new Meteor.Error(500, "User does not own message");
 			}
