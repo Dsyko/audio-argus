@@ -105,7 +105,7 @@ WebApp.connectHandlers.use(function(request, result, next) {
 
 					}
 					messageId = splitPath[2];
-					message = Messages.findOne({_id: messageId}, {fields: {text: 1, userId: 1}});
+					message = Messages.findOne({_id: messageId}, {fields: {userId: 1, name: 1, deviceId: 1}});
 					var messagetext = "We have detected an issue with your device \"" + message.name + "\" with the deviceiId: " + message.deviceId + ". Please perform maintenance as soon as possible.";
 					if(message && _.isString(messagetext)){
 						var user = Users.findOne({_id: message.userId}, {fields: {profile: 1}});
