@@ -1,0 +1,127 @@
+div[data-action="return-home"]{
+	cursor: pointer;
+}
+
+.app-title {
+	color: @color-primary;
+	.font-l2;
+	-webkit-transform: translate3d(0, 0, 0);
+	transform: translate3d(0, 0, 0);
+	-webkit-transition: font-size @animationLength ease-in-out;
+	transition: font-size @animationLength ease-in-out;
+	width: 100%;
+	display: inline-block;
+	text-align: center;
+	font-weight: 700;
+	white-space: nowrap;
+}
+.app-sub-title{
+	color: @argus-body;
+	.font-s3;
+	width: 100%;
+}
+
+//.skull-jaw{
+//	-webkit-transition: -webkit-transform .5s ease-in-out;
+//	transition: transform .5s ease-in-out;
+//}
+
+.skull-laugh-slow{
+	.skull-jaw{
+		animation: laugh-small 15s ease-in-out infinite;
+	}
+}
+.skull-laugh-fast{
+	.skull-jaw{
+		animation: laugh 4s ease-in-out infinite;
+	}
+}
+
+.skull-close-jaw{
+	.skull-jaw{
+		animation: closeJaw .5s ease-in-out;
+		//-webkit-transition: -webkit-transform .5s ease-in-out;
+		//transition: transform .5s ease-in-out;
+		//transform: translateY(-22px);
+	}
+}
+
+.skull-outline{
+		-webkit-transition: fill .5s ease-in-out;
+		transition: fill .5s ease-in-out;
+}
+.skull-red-outline{
+	.skull-outline{
+		fill: @color-primary;
+	}
+}
+
+.app-icon{
+	width: 100%;
+	//height: auto;
+	//-webkit-transform: translate3d(0,0,0);
+	//transform: translate3d(0,0,0);
+	-webkit-transition: width @animationLength ease-in-out;
+	transition: width @animationLength ease-in-out;
+	display: inline-block;
+	svg{
+		width: 100%;
+	}
+}
+.app-icon,
+.app-title,
+.app-sub-title{
+	text-align: center;
+	display: inline-block;
+}
+
+.app-logout{
+	display: inline-block;
+	vertical-align: top;
+	float: right;
+	margin-right: 10px;
+	margin-top: 10px;
+	visibility: hidden;
+	opacity: 0;
+	position: absolute;
+	top: 0px;
+	right: 0px;
+}
+.app-sub-title{
+	.visible-animated;
+}
+
+.collapsed-header{
+	margin-bottom: 20px;
+	.app-sub-title{
+		text-align: center;
+	}
+	.app-icon{
+		width: 40px;
+	}
+	.app-icon,
+	.app-title,
+	.app-sub-title{
+		//display:inline-block;
+	}
+	.app-sub-title{
+		.hidden-animated;
+		.minimize-delayed;
+		vertical-align: top;
+	}
+	.app-title{
+		.font-m1;
+		text-align: center;
+		vertical-align: top;
+		margin-top: 10px;
+		margin-left: 5px;
+		font-weight: 700;
+		-webkit-transition: font-size @animationLength/2 ease-in, width @animationLength/2 ease-in-out .2s;
+		transition: font-size @animationLength/2 ease-in, width @animationLength/2 ease-in-out .2s;
+		width: 80px;
+	}
+	.app-logout{
+		.visible-animated;
+	}
+
+}

@@ -1,0 +1,10 @@
+*.sublime-workspace
+npm-debug.log
+node_modules
+.DS_Store
+/**/.DS_Store
+.idea/
+*~
+.tern*
+app/server/lib/secrets.js
+app/client/lib/secrets.js
