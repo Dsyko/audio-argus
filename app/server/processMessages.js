@@ -77,7 +77,7 @@ processMessages = function(){
 };
 
 Meteor.startup(function () {
-	processMessages();
+	//processMessages();
 });
 
 
@@ -92,43 +92,58 @@ WebApp.connectHandlers.use(function(request, result, next) {
 	// else is wrapping this in a fiber automatically
 	//Fiber(function () {
 	Meteor.wrapAsync(function(){
+		var message, messageId;
 		try {
 			if(!request || !request.url){
 				next();
 				return;
 			}
 			var splitPath = request.url.split('/');
-			if (splitPath[1] !== '_twiml'){
+			var requestRoot = splitPath[1];
+			if (requestRoot !== '_twiml' && requestRoot !== '_sigfox'){
 				//Not an Twiml request, return null and the middleware handler will pass request processing to next connectHandler
 				next();
 				return;
 			}else{
-				if(request.method === 'POST') {
+				if(requestRoot === '_twiml'){
+					if(request.method === 'POST') {
 
-				}
-				var messageId = splitPath[2];
-				var message = Messages.findOne({_id: messageId}, {fields: {text: 1, userId: 1}});
-				if(message && _.isString(message.text)){
-					var user = Users.findOne({_id: message.userId}, {fields: {profile: 1}});
-					var twiml = new twilio.TwimlResponse();
-					var intro = "This is an automated message";
-					if(user && user.profile && user.profile.name){
-						intro += " being sent to you by " + user.profile.name;
 					}
-					intro += ". The message is as follows.";
+					messageId = splitPath[2];
+					message = Messages.findOne({_id: messageId}, {fields: {text: 1, userId: 1}});
+					if(message && _.isString(message.text)){
+						var user = Users.findOne({_id: message.userId}, {fields: {profile: 1}});
+						var twiml = new twilio.TwimlResponse();
+						var intro = "This is an automated message";
+						if(user && user.profile && user.profile.name){
+							intro += " being sent to you by " + user.profile.name;
+						}
+						intro += ". The message is as follows.";
 
-					twiml.say(intro, {voice: 'man', language:'en'})
-						.pause({ length: 1 })
-						.say(message.text, {voice: 'woman', language:'en'})
-						.pause({ length: 1 })
-						.say("This message was sent to you through Moo Air Tee Or, a dead man's switch which sends a message if a user doesn't check in for a certain period of time. For more information go to M, U, E, R, T, E, O, R, dot com.", {voice: 'man', language:'en'})
-						.pause({ length: 1 })
-						.say("Thank you, good bye.", {voice: 'man', language:'en'});
-					//.play('http://www.example.com/some_sound.mp3');
+						twiml.say(intro, {voice: 'man', language:'en'})
+							.pause({ length: 1 })
+							.say(message.text, {voice: 'woman', language:'en'})
+							.pause({ length: 1 })
+							.say("This message was sent to you through Moo Air Tee Or, a dead man's switch which sends a message if a user doesn't check in for a certain period of time. For more information go to M, U, E, R, T, E, O, R, dot com.", {voice: 'man', language:'en'})
+							.pause({ length: 1 })
+							.say("Thank you, good bye.", {voice: 'man', language:'en'});
+						//.play('http://www.example.com/some_sound.mp3');
+						result.writeHead(200, {'Content-Type': 'text/xml'});
+						result.end(twiml.toString());
+						return;
+					}
+				}else if(requestRoot === '_sigfox'){
+					var deviceId = splitPath[2];
+					message = Messages.findOne({deviceId: deviceId}, {fields: {userId: 1}});
+					if(message){
+						Messages.update({_id: message._id}, {$set: {deviceHealthy: false}});
+					}
+					console.log("_sigfox deviceId: ", deviceId);
 					result.writeHead(200, {'Content-Type': 'text/xml'});
-					result.end(twiml.toString());
+					result.end();
 					return;
 				}
+
 			}
 			next();
 			return;

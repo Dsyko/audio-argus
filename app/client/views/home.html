@@ -21,10 +21,10 @@
 	{{/if}}
 	<div class="row-fluid">
 		<div class="col-xs-6">
-			Your Alerts ({{alertCount}})
+			Your Devices ({{alertCount}})
 		</div>
 		<div class="col-xs-6 text-right">
-			<button class="btn btn-default btn-mini new-message-button" data-action="new-message"><i class="fa fa-plus"></i> New Alert</button>
+			<button class="btn btn-default btn-mini new-message-button" data-action="new-message"><i class="fa fa-plus"></i> Add Device</button>
 		</div>
 	</div>
 	<div class="row-fluid">
@@ -40,39 +40,33 @@
 							<button data-action="delete-message"> <i class="entypo entypo-trash"></i></button>
 						</div>
 						<div class="message-time-left text-center">
-							{{#with timeLeft}}
-								{{#momentum plugin='velocity-reverse' duration=250}}
-									{{#if equal this 'Expired!'}}
-										<div>
-											<div class="message-sent-icon  skull-laugh-fast">
-												{{>argusicon}}
-											</div>
-											{{#if ../messageSent}}
-												<span class="message-sent">Message Sent!</span>
-											{{else}}
-												Sending Message
-											{{/if}}
+							{{#momentum plugin='velocity-reverse' duration=250}}
+								{{#if deviceHealthy}}
+									<div>
+										<i class="entypo entypo-clock"></i> Device Status
+									</div>
+									<div class="message-time-left-timer">
+										Healthy!
+									</div>
+								{{else}}
+									<div>
+										<div class="message-sent-icon">
+											{{>argusicon}}
 										</div>
-									{{else}}
-										<div>
-											<i class="entypo entypo-clock"></i> Time Left
-										</div>
-										<div class="message-time-left-timer">
-											{{this}}
-										</div>
-									{{/if}}
-								{{/momentum}}
-							{{/with}}
+										Device Needs Maintenance
+									</div>
+								{{/if}}
+							{{/momentum}}
 						</div>
 						<div class="message-reset text-center">
-							<button class="btn btn-default btn-small" data-action="reset-message-timer"><i class="entypo entypo-back-in-time"></i> Reset Timer</button>
+							<button class="btn btn-default btn-small" data-action="reset-device-status"><i class="entypo entypo-back-in-time"></i> Reset Device</button>
 						</div>
 					</div>
 				</div>
 			{{else}}
 				<div class="col-xs-12 text-center">
 					<div class="no-messages-text">
-						You don't have any alerts yet. Tap 'New Alert' at the top right to create one.
+						You don't have any devices yet. Tap 'Add Device' at the top right to add one.
 					</div>
 				</div>
 			{{/each}}

@@ -3,43 +3,33 @@
 		{{#with message}}
 			{{#momentum plugin='velocity-reverse' duration=250}}
 				{{#if queryParamEquals 'messageStep' 'name'}}
+					<div class="col-xs-12 text-center new-message-sub-header">
+						Give your device a name.
+					</div>
 					<div class="col-xs-12">
 						<div class="col-xs-12">
 							{{>newMessageEditableName}}
 						</div>
 					</div>
-					<div class="col-xs-12 text-center new-message-sub-header">
-						Give your alert a name.
-					</div>
 				{{/if}}
-				{{#if queryParamEquals 'messageStep' 'text'}}
+				{{#if queryParamEquals 'messageStep' 'deviceId'}}
+					<div class="col-xs-12 text-center new-message-sub-header">
+						Enter the device ID: like "C6FA1" omit zeroes
+					</div>
 					<div class="col-xs-12">
 						<div class="col-xs-12">
-							{{>newMessageEditableText}}
+							{{>newMessageId}}
 						</div>
-					</div>
-					<div class="col-xs-12 text-center new-message-sub-header">
-						What message would you like to send?
-					</div>
-				{{/if}}
-				{{#if queryParamEquals 'messageStep' 'timer'}}
-					<div class="col-xs-12">
-						<div class="col-xs-12">
-							{{>newMessageEditableTime}}
-						</div>
-					</div>
-					<div class="col-xs-12 text-center new-message-sub-header">
-						Select how much time should pass without a check in before Muerteor sends your message.
 					</div>
 				{{/if}}
 				{{#if queryParamEquals 'messageStep' 'people'}}
+					<div class="col-xs-12 text-center new-message-sub-header">
+						Who do you want to send an alert to?
+					</div>
 					<div class="col-xs-12">
 						<div class="col-xs-12">
 							{{>newMessageEditablePeople}}
 						</div>
-					</div>
-					<div class="col-xs-12 text-center new-message-sub-header">
-						Who do you want to send this message to?
 					</div>
 				{{/if}}
 			{{/momentum}}
@@ -59,8 +49,8 @@
 	<input type="text" placeholder="Name Your Message"/>
 </template>
 
-<template name="newMessageEditableText">
-	<textarea placeholder="Message to send" rows="5"></textarea>
+<template name="newMessageId">
+	<input type="text" placeholder="Your Device ID"/>
 </template>
 
 <template name="newMessageEditableTime">

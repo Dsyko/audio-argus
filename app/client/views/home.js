@@ -54,22 +54,23 @@ Template.home.events = {
 		var messageId = Messages.insert({
 			userId: Meteor.userId(),
 			createdAt: moment().valueOf(),
-			newMessage: true //To prevent screen flickering as message is added before we move to the new message route
+			newMessage: true, //To prevent screen flickering as message is added before we move to the new message route,
+			deviceHealthy: true
 		});
-		FlowRouter.go('/new-message/' + messageId + '?messageStep=timer');
+		FlowRouter.go('/new-message/' + messageId + '?messageStep=name');
 	},
-	'click button[data-action="reset-message-timer"]': function(event, template){
+	'click button[data-action="reset-device-status"]': function(event, template){
 		var message = this;
-		Meteor.call('resetMessageTimer', message._id, moment().valueOf());
+		Meteor.call('resetDeviceStatus', message._id, moment().valueOf());
 	},
 	'click button[data-action="edit-message"]': function(event, template){
 		var message = this;
-		FlowRouter.go('/new-message/' +  message._id + '?messageStep=timer');
+		FlowRouter.go('/new-message/' +  message._id + '?messageStep=name');
 	},
 	'click button[data-action="delete-message"]': function(event, template){
 		var message = this;
 		bootbox.dialog({
-			message: "Are you sure you want to delete this message?",
+			message: "Are you sure you want to delete this device?",
 			//title: "Delete Message",
 			buttons: {
 				success: {

@@ -5,7 +5,7 @@ var saveField = function(collection, documentId, field, newValue){
 };
 var throttledSave = _.debounce(saveField, 300);
 
-var newMessageSteps = [ 'timer', 'text', 'people', 'name'];
+var newMessageSteps = [ 'name', 'deviceId', 'people'];
 
 Template.newMessage.onCreated(function(){
 	if(!_.isString(FlowRouter.getQueryParam('messageStep'))){
@@ -39,7 +39,7 @@ Template.newMessage.events = {
 		}else{
 			FlowRouter.go('/');
 			FlowRouter.setQueryParams({messageStep: null});
-			Meteor.call('resetMessageTimer', message._id, moment().valueOf());
+			Meteor.call('resetDeviceStatus', message._id, moment().valueOf());
 		}
 	},
 	'click button[data-action="prev"]': function(event, template){
@@ -71,17 +71,17 @@ Template.newMessageEditableName.events = {
 };
 
 
-Template.newMessageEditableText.onRendered(function(){
+Template.newMessageId.onRendered(function(){
 	var template = this;
-	template.$('textarea').val(template.data.text);
-	template.$('textarea').focus();
+	template.$('input').val(template.data.deviceId);
+	template.$('input').focus();
 });
 
-Template.newMessageEditableText.events = {
-	'keyup textarea': function(event, template){
+Template.newMessageId.events = {
+	'keyup input': function(event, template){
 		event.preventDefault();
 		var message = this;
-		throttledSave(Messages, message._id, 'text', template.$('textarea').val());
+		throttledSave(Messages, message._id, 'deviceId', template.$('input').val());
 	}
 };
 
