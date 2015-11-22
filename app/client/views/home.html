@@ -43,23 +43,26 @@
 							{{#momentum plugin='velocity-reverse' duration=250}}
 								{{#if deviceHealthy}}
 									<div>
-										<i class="entypo entypo-clock"></i> Device Status
-									</div>
-									<div class="message-time-left-timer">
-										Healthy!
-									</div>
-								{{else}}
-									<div>
 										<div class="message-sent-icon">
 											{{>argusicon}}
 										</div>
-										Device Needs Maintenance
+											Device is Healthy!
+									</div>
+								{{else}}
+									<div>
+										<div class="message-sent-icon warning-icon">
+											{{>argusicon}}
+										</div>
+										<div class="warning-text">
+											Device Needs Maintenance!
+										</div>
+
+										<div class="message-reset text-center">
+											<button class="btn btn-default btn-small" data-action="reset-device-status"><i class="entypo entypo-back-in-time"></i> Reset Device</button>
+										</div>
 									</div>
 								{{/if}}
 							{{/momentum}}
-						</div>
-						<div class="message-reset text-center">
-							<button class="btn btn-default btn-small" data-action="reset-device-status"><i class="entypo entypo-back-in-time"></i> Reset Device</button>
 						</div>
 					</div>
 				</div>
